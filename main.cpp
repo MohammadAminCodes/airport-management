@@ -26,15 +26,13 @@ public:
     void setPreviousFlight( flight *previousFlight )
     { this -> previousFlight = previousFlight; }
 
-    //    void  setNextFlight( flight *nextflight )
-    //    { this -> nextFlight = nextflight; }
+    void  setNextFlight( flight *nextflight )
+    { this -> nextFlight = nextflight; }
 
     //    flight *getPreviousFLight()
     //    { return previousFlight; }
 
-    flight *getNextFlight()
-    { return nextFlight; }
-
+    flight *getNextFlight() { return nextFlight; }
     string getTime();
     string getModel();
     string getType();
@@ -95,7 +93,6 @@ int flight::getFlight_number()
 int flight::getID()
 { return id; }
 
-
 void flight::setTime( string t )
 { this -> time = t; }
 
@@ -131,7 +128,7 @@ public:
 
     void getAirplaneSizeFromUser();
 
-    void getNumberOfFlightsFromUser();
+    //    void getNumberOfFlightsFromUser();
 
     void insert();
 
@@ -139,11 +136,11 @@ public:
 
     void print();
 
-    void Delete( int );
+    void Delete();
 
     //    void getRunWaysFormUser();
 
-    flight * searchById( int id )
+    flight *searchById( int id )
     {
         flight *current = first;
 
@@ -161,7 +158,7 @@ public:
         return current;
     };
 
-    flight * searchByFlightNumber( int fl_num )
+    flight *searchByFlightNumber( int fl_num )
     {
         flight *current = first;
 
@@ -180,8 +177,8 @@ public:
 
 };
 
-void Airport::getNumberOfFlightsFromUser()
-{ cin >> number_of_flights; }
+//void Airport::getNumberOfFlightsFromUser()
+//{ cin >> number_of_flights; }
 
 void Airport::getAirplaneSizeFromUser()
 {
@@ -195,11 +192,11 @@ void Airport::getAirplaneSizeFromUser()
 
         cout << "Please Enter the first line that airplane can take off or landing on it: ";
         cin >> FirstLine;
+
+        airplane_size.insert( pair< string, int >( ModelOfAirplane, FirstLine ) );
     }
-
-    airplane_size[ ModelOfAirplane ] = FirstLine;
-
 }
+
 //void Airport::getRunWaysFormUser()
 //{
 //      cout << "Please Enter runway of this flight: ";
@@ -212,12 +209,12 @@ void Airport::insert()
     string mdl;
     string typ;
     int passen_n;
-    int r_w;
+    int r_w = 0;
     int fl_num;
     int id;
 
-    cout << "Please Enter type of this flight: ";
-    cin >> typ;
+    cout << "Please Enter type of this flight:( <<Arrival Flight>> OR <<Exit Flight>> )";
+    getline( cin, typ );
 
     cout << "Please Enter time of flight: ";
     getline( cin, time );
@@ -231,7 +228,7 @@ void Airport::insert()
     cout << "Please Enter flight number: ";
     cin >> fl_num;
 
-    cout << "Please Eneter ID number of this flight:( <<Arrival Flight>> OR <<Exit Flight>> ) ";
+    cout << "Please Eneter ID number of this flight: ";
     cin >> id;
 
     if( typ == "Arrival Flight" )
@@ -246,7 +243,6 @@ void Airport::insert()
         r_w = exi -> getRunway();
     }
 
-    //string myText("12-32-12-13");
     istringstream iss( time );
     string token;
 
@@ -265,29 +261,62 @@ void Airport::insert()
         runways[ r_w ][ hour ] = 1;
     else
     {
+        int counter = 0;
         int first = airplane_size[ mdl ];
+        //  cout << "First is:" << first << endl;
 
-        while( runways[ r_w ][ hour ] == 1 )
+        for( int i = first; i < 5; i++ )
         {
-            hour += 1;
-
-            if( hour == 48 )
+            if( runways[ i ][ hour ] == 0 )
             {
-                r_w += 1;
-                hour = 0;
+                runways[ i ][ hour ] = 1;
+                r_w = i;
+                break;
+            }
+            else
+                counter++;
+        }
+
+        if( counter == 5 - first )
+        {
+            while( runways[ r_w ][ hour ] == 1 )
+            {
+                hour++;
+                for( int i = first; i < 5; i++ )
+                    if( runways[ i ][ hour ] == 0 )
+                    {
+                        runways[ i ][ hour ] = 1;
+                        r_w = i;
+                        break;
+                    }
+
+                if( hour == 48 )
+                    cout << "\nUnfortunately All airport runways are full for today!!!";
             }
         }
-        runways[ r_w ][ hour ] = 1;
     }
+
+    int m = hour % 2;
+    hour /= 2;
 
     time = to_string( hour );
     time += ':';
-    time += to_string( minute );
+
+    if( m != 0 )
+    {
+        minute = 30;
+        time += to_string( minute );
+    }
+
+    else
+        time += "00";
+
+    cout << "Time is: " << time << endl;
 
     flight *temp = new flight( time, mdl, typ, passen_n, fl_num, id, r_w );
 
     if( first )
-        first -> setPreviousFlight( temp );
+        temp -> setNextFlight( first );
     if( !last )
         last = temp;
 
@@ -297,20 +326,19 @@ void Airport::insert()
 
 void Airport::sort()
 {
-    flight *current;
+    flight *current = first;
     flight *next;
 
-    int k = number_of_flights;
+    //int k = number_of_flights;
 
-    for( int i = 0; i < number_of_flights - 1; i++, k-- )
+    while( current -> getNextFlight() != NULL )
     {
-        current = first;
-        next = first -> getNextFlight();
-
-        for( int j = 1; j < k; j++ )
+        next = current -> getNextFlight();
+        while ( next != NULL )
         {
             if( ( current -> getTime() ).compare( next -> getTime() ) > 0 )
             {
+                cout << "BAAAAANGGG!\n";
                 //time
                 string temp = next -> getTime();
                 next -> setTime( current -> getTime() );
@@ -346,22 +374,30 @@ void Airport::sort()
                 next -> setID( current -> getID() );
                 current -> setID( tmp );
             }
-            current -> getNextFlight();
-            next -> getNextFlight();
+            next = next -> getNextFlight();
         }
+        current = current -> getNextFlight();
     }
 }
 
 void Airport::print()
 {
-    flight *temp = this -> first;
+    int choose_sort;
+    cout << "If you want to sort flights before print them enter 0 and if you don't want"
+            " to sort enter another number: ";
+    cin >> choose_sort;
+
+    if( choose_sort == 0 )
+        sort();
+
+    flight *temp = first;
 
     if( !temp )
         cout << "There isn't any flight!!!\n";
-    while( temp )
+    for( int i = 0; i < number_of_flights; i++ )
     {
-        //TIME
-        cout << "\nTime of flight is: " << temp -> getTime();
+        //TIME;
+        cout << "Time of flight is: " << temp -> getTime();
 
         //MODEL
         cout << "\nModel of airplane is: " << temp -> getModel();
@@ -373,20 +409,23 @@ void Airport::print()
         cout << "\nNumber of passengers is: " << temp -> getPassengers();
 
         //RUN WAY
-        cout << "\nRun way number of flight is: " << temp -> getRunway() << endl;
+        cout << "\nRun way number of flight is: " << temp -> getRunway();
 
         //FLIGHT NUMBER
-        cout << "\nFlight number is: " << temp -> getFlight_number() << endl;
+        cout << "\nFlight number is: " << temp -> getFlight_number();
 
         //ID
-        cout << "\nID:" << temp -> getID() << endl;
+        cout << "\nID: " << temp -> getID() << endl;
 
         temp = temp -> getNextFlight();
     }
 }
 
-void Airport::Delete( int fl_num )
+void Airport::Delete()
 {
+    int fl_num;
+    cout << "Please Enter the flight number you want to delete it: ";
+    cin >> fl_num;
     flight *del = searchById( fl_num );
 
     if( del == first )
@@ -394,11 +433,45 @@ void Airport::Delete( int fl_num )
 
     else
         del = del -> getNextFlight();
+
+    number_of_flights--;
+}
+
+void func()
+{
+    Airport a;
+
+    cout << "Welcome to the flight management menu of Isfahan Airport:\n"
+         << "/////--------------------------------------------------------/////\n";
+
+    while( true )
+    {
+        cout << "Please Enter << airplane_size >> for profile registration.\n";
+        cout << "Please Enter << insert >> to add a flight.\n";
+        cout << "Please Enter << delete >> to delete a flight.\n";
+        cout << "Please Enter << arrange >> to sort the flights( sort by time ).\n";
+        cout << "Please Enter << print >> to print all the flights.\n";
+
+        string choose;
+        cout << "Enter your choice please: ";
+        getline( cin, choose );
+
+        if( choose == "airplane_size" )
+            a.getAirplaneSizeFromUser();
+        else if( choose == "insert" )
+            a.insert();
+        else if( choose == "delete" )
+            a.Delete();
+        else if( choose == "arrange" )
+            a.sort();
+        else if( choose == "print" )
+            a.print();
+    }
 }
 
 int main( void )
 {
-
+    func();
 
     return 0;
 }
