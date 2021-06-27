@@ -29,8 +29,8 @@ public:
     void  setNextFlight( flight *nextflight )
     { this -> nextFlight = nextflight; }
 
-    //    flight *getPreviousFLight()
-    //    { return previousFlight; }
+    flight *getPreviousFLight()
+    { return previousFlight; }
 
     flight *getNextFlight() { return nextFlight; }
     string getTime();
@@ -144,35 +144,30 @@ public:
     {
         flight *current = first;
 
-        if( first == NULL )
-            return NULL;
-
-        while( current -> getID() != id )
+        while( current -> getID() != NULL )
         {
-            if( current -> getNextFlight() == NULL )
-                return NULL;
-            else
-                current -> getNextFlight();
+            if( current -> getID() == id )
+            {
+                return current;
+            }
+            current = current -> getNextFlight();
         }
-
-        return current;
+        return NULL;
     };
 
     flight *searchByFlightNumber( int fl_num )
     {
         flight *current = first;
 
-        if( first == NULL )
-            return NULL;
-        while( current -> getFlight_number() != fl_num )
+        for( int i = 0; i < number_of_flights; i++ )
         {
-            if( current -> getNextFlight() == NULL )
-                return  NULL;
-
-            else
-                current = current -> getNextFlight();
+            if( current -> getFlight_number() == fl_num )
+            {
+                return current;
+            }
+            current = current -> getNextFlight();
         }
-        return current;
+        return NULL;
     };
 
 };
@@ -338,7 +333,6 @@ void Airport::sort()
         {
             if( ( current -> getTime() ).compare( next -> getTime() ) > 0 )
             {
-                cout << "BAAAAANGGG!\n";
                 //time
                 string temp = next -> getTime();
                 next -> setTime( current -> getTime() );
@@ -426,13 +420,66 @@ void Airport::Delete()
     int fl_num;
     cout << "Please Enter the flight number you want to delete it: ";
     cin >> fl_num;
+
     flight *del = searchById( fl_num );
 
-    if( del == first )
+    flight *temp = first;
+    flight *tmp = first;
+    int not_exit_in_list=0;
+
+    istringstream iss( del -> getTime() );
+    string token;
+
+    getline( iss, token, ':' );
+    int hour = stoi( token );
+
+    getline( iss, token, ':' );
+    int minute = stoi( token );
+
+    if ( minute > 0 )
+        minute = 1;
+    hour = ( hour * 2 ) + minute;
+
+    if( runways[ del -> getRunway() ][ hour ] == 1 )
+        runways[ del -> getRunway() ][ hour ] = 0;
+
+    if(first == del )
+    {
+        temp = first;
         first = first -> getNextFlight();
+        delete temp;
+    }
 
     else
-        del = del -> getNextFlight();
+    {
+        while( tmp != last )
+        {
+            temp = tmp -> getNextFlight();
+            if( temp == del )
+            {
+                if( temp == last )
+                {
+                    tmp -> setNextFlight( NULL );
+                    delete temp;
+                    last = tmp;
+                    not_exit_in_list = 1;
+                    break;
+                }
+                else
+                {
+                    tmp -> setNextFlight( temp -> getNextFlight() );
+                    delete temp;
+                    not_exit_in_list = 1;
+                    break;
+                }
+            }
+            tmp = tmp -> getNextFlight();
+        }
+        if( not_exit_in_list == 0 )
+        {
+            cout<<"There is not flight with flight number = "<< fl_num <<" in flights."<<endl;
+        }
+    }
 
     number_of_flights--;
 }
@@ -456,7 +503,7 @@ void func()
         cout << "Enter your choice please: ";
         getline( cin, choose );
 
-        if( choose == "airplane_size" )
+        if( choose == "a" )
             a.getAirplaneSizeFromUser();
         else if( choose == "insert" )
             a.insert();
