@@ -5,7 +5,6 @@
 using namespace std;
 
 //node
-
 class flight{
 private:
     string time;
@@ -134,7 +133,7 @@ public:
 
     void sort();
 
-    void print();
+    void print( int );
 
     void Delete();
 
@@ -144,11 +143,12 @@ public:
     {
         flight *current = first;
 
-        while( current -> getID() != NULL )
+        while( current != NULL )
         {
             if( current -> getID() == id )
             {
                 return current;
+                break;
             }
             current = current -> getNextFlight();
         }
@@ -157,19 +157,26 @@ public:
 
     flight *searchByFlightNumber( int fl_num )
     {
+        cout << "BBBBBBBBBBBBB\n";
         flight *current = first;
 
-        for( int i = 0; i < number_of_flights; i++ )
-        {
-            if( current -> getFlight_number() == fl_num )
-            {
-                return current;
-            }
-            current = current -> getNextFlight();
-        }
-        return NULL;
-    };
+        if( first == NULL )
+            return NULL;
 
+        while(current -> getFlight_number() != fl_num )
+        {
+            //if it is last node
+            if( current -> getNextFlight() == NULL)
+                return NULL;
+            else
+                current = current -> getNextFlight();
+            //go to next link
+
+        }
+
+        //if data found, return the current Link
+        return current;
+    };
 };
 
 //void Airport::getNumberOfFlightsFromUser()
@@ -184,10 +191,10 @@ void Airport::getAirplaneSizeFromUser()
     {
         cout << "Please Enter model of airplane: ";
         cin >> ModelOfAirplane;
-
+        cin.ignore();
         cout << "Please Enter the first line that airplane can take off or landing on it: ";
         cin >> FirstLine;
-
+        cin.ignore();
         airplane_size.insert( pair< string, int >( ModelOfAirplane, FirstLine ) );
     }
 }
@@ -216,20 +223,25 @@ void Airport::insert()
 
     cout << "Please Enter model of this airplane: ";
     cin >> mdl;
+    cin.ignore();
 
     cout << "Please Enter number of passengers for this flight: ";
     cin >> passen_n;
+    cin.ignore();
 
     cout << "Please Enter flight number: ";
     cin >> fl_num;
+    cin.ignore();
 
     cout << "Please Eneter ID number of this flight: ";
     cin >> id;
+    cin.ignore();
 
     if( typ == "Arrival Flight" )
     {
         cout << "Please Enter run way of this flight: ";
         cin >> r_w;
+        cin.ignore();
     }
 
     else if( typ == "Exit Flight" )
@@ -247,13 +259,13 @@ void Airport::insert()
     getline( iss, token, ':' );
     int minute = stoi( token );
 
-    //hour -= 1;
     if ( minute > 0 )
         minute = 1;
     hour = ( hour * 2 ) + minute;
 
     if( runways[ r_w ][ hour ] == 0 )
         runways[ r_w ][ hour ] = 1;
+
     else
     {
         int counter = 0;
@@ -306,7 +318,7 @@ void Airport::insert()
     else
         time += "00";
 
-    cout << "Time is: " << time << endl;
+    //    cout << "Time is: " << time << endl;
 
     flight *temp = new flight( time, mdl, typ, passen_n, fl_num, id, r_w );
 
@@ -374,45 +386,79 @@ void Airport::sort()
     }
 }
 
-void Airport::print()
+void Airport::print( int choose )
 {
-    int choose_sort;
-    cout << "If you want to sort flights before print them enter 0 and if you don't want"
-            " to sort enter another number: ";
-    cin >> choose_sort;
-
-    if( choose_sort == 0 )
-        sort();
-
+    sort();
     flight *temp = first;
-
+    system("color 0c");
     if( !temp )
         cout << "There isn't any flight!!!\n";
+
     for( int i = 0; i < number_of_flights; i++ )
     {
-        //TIME;
-        cout << "Time of flight is: " << temp -> getTime();
+        system("color 0e");                         // change text color to yellow
 
-        //MODEL
-        cout << "\nModel of airplane is: " << temp -> getModel();
+        if( choose == 0 )
+        {
+            //TIME;
+            cout << "Time of flight is: " << temp -> getTime();
 
-        //TYPE
-        cout << "\nType of this flight is: " << temp -> getType();
+            //MODEL
+            cout << "\nModel of airplane is: " << temp -> getModel();
 
-        //NUMBER OF PASSENGERS
-        cout << "\nNumber of passengers is: " << temp -> getPassengers();
+            //TYPE
+            cout << "\nType of this flight is: " << temp -> getType();
 
-        //RUN WAY
-        cout << "\nRun way number of flight is: " << temp -> getRunway();
+            //NUMBER OF PASSENGERS
+            cout << "\nNumber of passengers is: " << temp -> getPassengers();
 
-        //FLIGHT NUMBER
-        cout << "\nFlight number is: " << temp -> getFlight_number();
+            //RUN WAY
+            cout << "\nRun way number of flight is: " << temp -> getRunway();
 
-        //ID
-        cout << "\nID: " << temp -> getID() << endl;
+            //FLIGHT NUMBER
+            cout << "\nFlight number is: " << temp -> getFlight_number();
 
+            //ID
+            cout << "\nID: " << temp -> getID() << endl;
+
+            cout << "_____________________________________________\n";
+        }
+
+        else if( choose != 0 & temp -> getRunway() == choose )
+        {
+            //TIME;
+            cout << "Time of flight is: " << temp -> getTime();
+
+            //MODEL
+            cout << "\nModel of airplane is: " << temp -> getModel();
+
+            //TYPE
+            cout << "\nType of this flight is: " << temp -> getType();
+
+            //NUMBER OF PASSENGERS
+            cout << "\nNumber of passengers is: " << temp -> getPassengers();
+
+            //RUN WAY
+            cout << "\nRun way number of flight is: " << temp -> getRunway();
+
+            //FLIGHT NUMBER
+            cout << "\nFlight number is: " << temp -> getFlight_number();
+
+            //ID
+            cout << "\nID: " << temp -> getID() << endl;
+
+            cout << "_____________________________________________\n";
+        }
         temp = temp -> getNextFlight();
     }
+
+    //see menu
+    cout << "Please enter << y >> to see the menu:";
+    char n;
+    cin >> n;
+    cin.ignore();
+
+    system("color 07");              // switch to default color
 }
 
 void Airport::Delete()
@@ -420,9 +466,10 @@ void Airport::Delete()
     int fl_num;
     cout << "Please Enter the flight number you want to delete it: ";
     cin >> fl_num;
+    cin.ignore();
 
-    flight *del = searchById( fl_num );
-
+    flight *del = searchByFlightNumber( fl_num );
+    cout << del -> getID();
     flight *temp = first;
     flight *tmp = first;
     int not_exit_in_list=0;
@@ -475,9 +522,11 @@ void Airport::Delete()
             }
             tmp = tmp -> getNextFlight();
         }
+
         if( not_exit_in_list == 0 )
         {
             cout<<"There is not flight with flight number = "<< fl_num <<" in flights."<<endl;
+            number_of_flights++;
         }
     }
 
@@ -498,12 +547,13 @@ void func()
         cout << "Please Enter << delete >> to delete a flight.\n";
         cout << "Please Enter << arrange >> to sort the flights( sort by time ).\n";
         cout << "Please Enter << print >> to print all the flights.\n";
+        cout << "Please Enter << exit >> to close program.\n";
 
         string choose;
         cout << "Enter your choice please: ";
         getline( cin, choose );
 
-        if( choose == "a" )
+        if( choose == "airplane_size" )
             a.getAirplaneSizeFromUser();
         else if( choose == "insert" )
             a.insert();
@@ -512,7 +562,17 @@ void func()
         else if( choose == "arrange" )
             a.sort();
         else if( choose == "print" )
-            a.print();
+        {
+            //choose runway
+            cout << "Please Enter runway which you want to print its flights: ";
+            int choose_runway;
+            cin >> choose_runway;
+            cin.ignore();
+
+            a.print( choose_runway );
+        }
+        else if( choose == "close" )
+            break;
     }
 }
 
