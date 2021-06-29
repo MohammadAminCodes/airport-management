@@ -50,7 +50,8 @@ public:
     void setType( string tp );      // set type
     void setPassengers( int p );    // set number of passengers
     void setRunway( int rw );       //set run way
-    void setFlight_number( int fl_num ) { flight_number = fl_num; }  // set flight number
+    void setFlight_number( int fl_num ) // set flight number
+    { flight_number = fl_num; }
     void setID( int i );            // set ID
 
 };
@@ -594,6 +595,7 @@ void func()
 
     while( true )
     {
+        //system("cls");                              // clear screen
         cout << "Please Enter << airplane_size >> for profile registration.\n";
         cout << "Please Enter << insert >> to add a flight.\n";
         cout << "Please Enter << delete >> to delete a flight.\n";
