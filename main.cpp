@@ -40,7 +40,7 @@ public:
     string getTime();              // get time
     string getModel();             // get model
     string getType();              // get type
-    int getPassengers();           // get number of passengers   
+    int getPassengers();           // get number of passengers
     int getRunway();               // get run way
     int getFlight_number();        // get flight number
     int getID();                   // get ID
@@ -136,31 +136,38 @@ public:
                 runways[ i ][ j ] = 0;
     }
 
+    //get first line which each model can dlight on that
     void getAirplaneSizeFromUser();
 
-    void insert();
+    void insert();       //add flight in list
 
-    void sort();
+    void sort();         //sort flights by time
 
-    void print( int );
+    void print( int );   //show all flight
 
-    void Delete();
+    void Delete();      //delete flight from list
 
     //search by ID
     flight *searchById( int id )
     {
         flight *current = first;
 
-        while( current != NULL )
+        if( first == NULL )
+            return NULL;
+
+        while( current -> getFlight_number() != id )
         {
-            if( current -> getID() == id )
-            {
-                return current;
-                break;
-            }
-            current = current -> getNextFlight();
+            //if it is last node
+            if( current -> getNextFlight() == NULL)
+                return NULL;
+            else
+                current = current -> getNextFlight();
+            //go to next link
+
         }
-        return NULL;
+
+        //if data found, return the current Link
+        return current;
     };
 
     //search by flight number
@@ -196,8 +203,8 @@ void Airport::getAirplaneSizeFromUser()
     system("color 0a");                // change screen color to green
     for ( int i = 0; i < 5; i++ )
     {
-        cout << "Please Enter model of airplane: ";          
-        cin >> ModelOfAirplane;        //get model of airplane 
+        cout << "Please Enter model of airplane: ";
+        cin >> ModelOfAirplane;        //get model of airplane
         cin.ignore();
         cout << "Please Enter the first line that airplane can take off or landing on it: ";
         cin >> FirstLine;              //get first line
@@ -355,7 +362,7 @@ void Airport::sort()
 
             while ( next != NULL )
             {
-        
+
                 if ( ( current -> getTime() ).compare( next -> getTime() ) > 0  )
                 {
                     //time
@@ -505,65 +512,63 @@ void Airport::Delete()
     cin.ignore();
 
     flight *del = searchByFlightNumber( fl_num );
-    flight *temp = first;
-    flight *tmp = first;
-    int not_exit_in_list = 0;
 
-    istringstream iss( del -> getTime() );
-    string token;
-
-    getline( iss, token, ':' );
-    int hour = stoi( token );            //seprate hour
-
-    getline( iss, token, ':' );
-    int minute = stoi( token );          //seprate minute
-
-    if ( minute > 0 )
-        minute = 1;
-    hour = ( hour * 2 ) + minute;
-
-    if( runways[ del -> getRunway() ][ hour ] == 1 )
-        runways[ del -> getRunway() ][ hour ] = 0;             //empty run way
-
-    if(first == del )
-    {
-        temp = first;
-        first = first -> getNextFlight();
-        delete temp;
-        cout << "Flight with flight number " << fl_num << " was successfully removed." << endl;
-    }
+    if( del == NULL )
+        cout << "There is not flight with flight number = " << fl_num << " in flights.";
 
     else
     {
-        while( tmp != last )
+        flight *temp = first;
+        flight *tmp = first;
+
+        istringstream iss( del -> getTime() );
+        string token;
+
+        getline( iss, token, ':' );
+        int hour = stoi( token );            //seprate hour
+
+        getline( iss, token, ':' );
+        int minute = stoi( token );          //seprate minute
+
+        if ( minute > 0 )
+            minute = 1;
+        hour = ( hour * 2 ) + minute;
+
+        if( runways[ del -> getRunway() ][ hour ] == 1 )
+            runways[ del -> getRunway() ][ hour ] = 0;             //empty run way
+
+        if(first == del )
         {
-            temp = tmp -> getNextFlight();
-            if( temp == del )
-            {
-                if( temp == last )
-                {
-                    tmp -> setNextFlight( NULL );
-                    delete temp;
-                    last = tmp;
-                    not_exit_in_list = 1;
-                    break;
-                }
-                else
-                {
-                    tmp -> setNextFlight( temp -> getNextFlight() );
-                    delete temp;
-                    not_exit_in_list = 1;
-                    break;
-                }
-                cout << "Flight with flight number "<< fl_num << " was successfully removed." << endl;
-            }
-            tmp = tmp -> getNextFlight();
+            temp = first;
+            first = first -> getNextFlight();
+            delete temp;
+            cout << "Flight with flight number " << fl_num << " was successfully removed.";
         }
 
-        if( not_exit_in_list == 0 )
+        else
         {
-            cout << "There is not flight with flight number = " << fl_num << " in flights." << endl;
-            number_of_flights++;
+            while( tmp != last )
+            {
+                temp = tmp -> getNextFlight();
+                if( temp == del )
+                {
+                    if( temp == last )
+                    {
+                        tmp -> setNextFlight( NULL );
+                        delete temp;
+                        last = tmp;
+                        break;
+                    }
+                    else
+                    {
+                        tmp -> setNextFlight( temp -> getNextFlight() );
+                        delete temp;
+                        break;
+                    }
+                    cout << "Flight with flight number "<< fl_num << " was successfully removed.";
+                }
+                tmp = tmp -> getNextFlight();
+            }
         }
     }
     cout << '\a';                           //make sound
